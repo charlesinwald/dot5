@@ -133,7 +133,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          DisplayPictureScreen(imagePath: path, fileName: name),
+                          DisplayPictureScreen(imagePath: path, fileName: name, location: position),
                     ),
                   );
                 } catch (e) {
@@ -148,7 +148,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 class DisplayPictureScreen extends StatelessWidget {
   final String imagePath;
   final String fileName;
-  const DisplayPictureScreen({Key key, this.imagePath, this.fileName})
+  final Position location;
+  const DisplayPictureScreen({Key key, this.imagePath, this.fileName, this.location})
       : super(key: key);
 
   @override
@@ -166,6 +167,7 @@ class DisplayPictureScreen extends StatelessWidget {
                 "http://128.180.108.68:4000/upload",
                 data: FormData.from({
                   "file": UploadFileInfo(File(imagePath), fileName),
+                  "location" : location
                 }),
               );
               print(response);
