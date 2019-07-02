@@ -31,12 +31,11 @@ Future<void> main() async {
 
   runApp(
     MaterialApp(
-      theme: ThemeData.dark(),
-      home: TakePictureScreen(
-        //Pass the appropriate camera to the widget
-        camera: firstCamera,
-      )
-    ),
+        theme: ThemeData.dark(),
+        home: TakePictureScreen(
+          //Pass the appropriate camera to the widget
+          camera: firstCamera,
+        )),
   );
 }
 
@@ -47,7 +46,7 @@ class TakePictureScreen extends StatefulWidget {
   const TakePictureScreen({
     Key key,
     @required this.camera,
-}) : super(key: key);
+  }) : super(key: key);
 
   @override
   TakePictureScreenState createState() => TakePictureScreenState();
@@ -63,10 +62,10 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     //To display the current output from the camera,
     //crete a CameraController
     _controller = CameraController(
-        //Get a specific camera from the list of available cameras
-        widget.camera,
-        //Define the resolution to use
-        ResolutionPreset.medium,
+      //Get a specific camera from the list of available cameras
+      widget.camera,
+      //Define the resolution to use
+      ResolutionPreset.medium,
     );
 
     //Next initialize the controller, this returns a Future
@@ -83,14 +82,16 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Take a picture'),),
+      appBar: AppBar(
+        title: Text('Take a picture'),
+      ),
       //Wait until the controller is initialized before displaying the camera
       //preview. Future builder displays a loading spinner until the controller
       //has finished initializing
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
-          if(snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.connectionState == ConnectionState.done) {
             //If the Future is complete, display the preview
             return CameraPreview(_controller);
           } else {
@@ -99,34 +100,42 @@ class TakePictureScreenState extends State<TakePictureScreen> {
           }
         },
       ),
-      floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.camera_alt),
-          //Button callback
-          onPressed: () async {
-            //Take the Picture in a try/catch block.
-            try {
-              //Ensure camera is initialized
-              await _initializeControllerFuture;
+      floatingActionButton: Transform.scale(
+          scale: 3,
+          child: CenterHorizontal(FloatingActionButton(
+              child: Icon(Icons.filter_tilt_shift),
+              backgroundColor: const Color(0xFFFFFF),
+              elevation: 0.0,
+              //Button callback
+              onPressed: () async {
+                //Take the Picture in a try/catch block.
+                try {
+                  //Ensure camera is initialized
+                  await _initializeControllerFuture;
 
-              //Construct the path to save to
-              var name = '${DateTime.now()}.png';
-              final path = join((await getTemporaryDirectory()).path,
-                name,
-              );
+                  //Construct the path to save to
+                  var name = '${DateTime.now()}.png';
+                  final path = join(
+                    (await getTemporaryDirectory()).path,
+                    name,
+                  );
 
-              //Attempt to take a picture and log where it's been saved
-              await _controller.takePicture(path);
+                  //Attempt to take a picture and log where it's been saved
+                  await _controller.takePicture(path);
 
-              //If the picture was taken, display it on a new screen
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => DisplayPictureScreen(imagePath: path, fileName: name),
-                ),
-              );
-            } catch (e) {
-              print(e);
-            }
-          }),
+                  //If the picture was taken, display it on a new screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          DisplayPictureScreen(imagePath: path, fileName: name),
+                    ),
+                  );
+                } catch (e) {
+                  print(e);
+                }
+              }))),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
@@ -134,15 +143,15 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 class DisplayPictureScreen extends StatelessWidget {
   final String imagePath;
   final String fileName;
-  const DisplayPictureScreen({Key key, this.imagePath, this.fileName}) : super (key: key);
+  const DisplayPictureScreen({Key key, this.imagePath, this.fileName})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Display the Picture')),
       //Constructs an image object from the path passed in as a parameter to the widget
-      body: Scaffold(
-          body: Image.file(File(imagePath))),
+      body: Scaffold(body: Image.file(File(imagePath))),
       floatingActionButton: FloatingActionButton(
           child: Icon(Icons.cloud_upload),
           onPressed: () async {
@@ -161,7 +170,7 @@ class DisplayPictureScreen extends StatelessWidget {
               File(imagePath).deleteSync(recursive: false);
               //Go back to the main screen
               Navigator.pop(context);
-            } catch(e) {
+            } catch (e) {
               print(e);
             }
           }),
@@ -279,4 +288,13 @@ class SignUpPage extends StatelessWidget {
       },
     );
   }
+}
+
+class CenterHorizontal extends StatelessWidget {
+  CenterHorizontal(this.child);
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [child]);
 }
