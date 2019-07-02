@@ -17,6 +17,8 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 import 'package:logging/logging.dart';
+import 'package:dio/dio.dart';
+
 Future<void> main() async {
   //Obtain a list of available cameras
   final cameras = await availableCameras();
@@ -107,8 +109,9 @@ class TakePictureScreenState extends State<TakePictureScreen> {
               await _initializeControllerFuture;
 
               //Construct the path to save to
+              var name = '${DateTime.now()}.png';
               final path = join((await getTemporaryDirectory()).path,
-                '${DateTime.now()}.png',
+                name,
               );
 
               //Attempt to take a picture and log where it's been saved
@@ -117,7 +120,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
               //If the picture was taken, display it on a new screen
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => DisplayPictureScreen(imagePath: path),
+                MaterialPageRoute(builder: (context) => DisplayPictureScreen(imagePath: path, fileName: name),
                 ),
               );
             } catch (e) {
@@ -130,8 +133,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
 class DisplayPictureScreen extends StatelessWidget {
   final String imagePath;
-
-  const DisplayPictureScreen({Key key, this.imagePath}) : super (key: key);
+  final String fileName;
+  const DisplayPictureScreen({Key key, this.imagePath, this.fileName}) : super (key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -145,9 +148,21 @@ class DisplayPictureScreen extends StatelessWidget {
           onPressed: () async {
             try {
               final log = Logger('DisplayPictureScreen');
-              log.fine(File(imagePath));
+//              log.fine(File(imagePath));
+              final Dio _dio = Dio();
+              Response response = await _dio.post(
+                "http://128.180.108.68:4000/upload",
+                data: FormData.from({
+                  "file": UploadFileInfo(File(imagePath), fileName),
+                }),
+              );
+              print(response);
+              //Delete the file now that we are done with it
+              File(imagePath).deleteSync(recursive: false);
+              //Go back to the main screen
+              Navigator.pop(context);
             } catch(e) {
-
+              print(e);
             }
           }),
     );
