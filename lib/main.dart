@@ -18,6 +18,7 @@ import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 import 'package:logging/logging.dart';
 import 'package:dio/dio.dart';
+import 'package:geolocator/geolocator.dart';
 
 Future<void> main() async {
   //Obtain a list of available cameras
@@ -110,6 +111,10 @@ class TakePictureScreenState extends State<TakePictureScreen> {
               onPressed: () async {
                 //Take the Picture in a try/catch block.
                 try {
+                  GeolocationStatus geolocationStatus = await Geolocator().checkGeolocationPermissionStatus();
+                  print(geolocationStatus);
+                  Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+                  print(position);
                   //Ensure camera is initialized
                   await _initializeControllerFuture;
 
@@ -156,8 +161,6 @@ class DisplayPictureScreen extends StatelessWidget {
           child: Icon(Icons.cloud_upload),
           onPressed: () async {
             try {
-              final log = Logger('DisplayPictureScreen');
-//              log.fine(File(imagePath));
               final Dio _dio = Dio();
               Response response = await _dio.post(
                 "http://128.180.108.68:4000/upload",
