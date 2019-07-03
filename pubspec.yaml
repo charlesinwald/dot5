@@ -25,6 +25,7 @@ dependencies:
   logging: ^0.11.3
   dio: ^2.1.8
   geolocator: ^3.0.1
+  rflutter_alert: ^1.0.3
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

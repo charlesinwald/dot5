@@ -19,6 +19,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:logging/logging.dart';
 import 'package:dio/dio.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 Future<void> main() async {
   //Obtain a list of available cameras
@@ -84,7 +85,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Take a picture'),
+        title: Text('DOT'),
       ),
       //Wait until the controller is initialized before displaying the camera
       //preview. Future builder displays a loading spinner until the controller
@@ -111,9 +112,11 @@ class TakePictureScreenState extends State<TakePictureScreen> {
               onPressed: () async {
                 //Take the Picture in a try/catch block.
                 try {
-                  GeolocationStatus geolocationStatus = await Geolocator().checkGeolocationPermissionStatus();
+                  GeolocationStatus geolocationStatus =
+                      await Geolocator().checkGeolocationPermissionStatus();
                   print(geolocationStatus);
-                  Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+                  Position position = await Geolocator().getCurrentPosition(
+                      desiredAccuracy: LocationAccuracy.best);
                   print(position);
                   //Ensure camera is initialized
                   await _initializeControllerFuture;
@@ -132,8 +135,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          DisplayPictureScreen(imagePath: path, fileName: name, location: position),
+                      builder: (context) => DisplayPictureScreen(
+                          imagePath: path, fileName: name, location: position),
                     ),
                   );
                 } catch (e) {
@@ -149,7 +152,8 @@ class DisplayPictureScreen extends StatelessWidget {
   final String imagePath;
   final String fileName;
   final Position location;
-  const DisplayPictureScreen({Key key, this.imagePath, this.fileName, this.location})
+  const DisplayPictureScreen(
+      {Key key, this.imagePath, this.fileName, this.location})
       : super(key: key);
 
   @override
@@ -167,12 +171,60 @@ class DisplayPictureScreen extends StatelessWidget {
                 "http://128.180.108.68:4000/upload",
                 data: FormData.from({
                   "file": UploadFileInfo(File(imagePath), fileName),
-                  "location" : location
+                  "location": location
                 }),
               );
               print(response);
+              var amount = 1.00;
               //Delete the file now that we are done with it
               File(imagePath).deleteSync(recursive: false);
+
+              var alertStyle = AlertStyle(
+//                overlayColor: Colors.blue[400],
+                overlayColor: Color(0xfff98650),
+                animationType: AnimationType.fromTop,
+                backgroundColor: Color(0xfff7f5ea),
+                isCloseButton: false,
+                isOverlayTapDismiss: false,
+                descStyle: TextStyle(
+                    fontWeight: FontWeight.bold, color: Color(0xff202125)),
+                animationDuration: Duration(milliseconds: 400),
+                alertBorder: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50.0),
+                  side: BorderSide(
+                    color: Colors.grey,
+                  ),
+                ),
+                titleStyle: TextStyle(
+                  color: Color(0xff393a3f),
+                ),
+              );
+              Alert(
+                context: context,
+                style: alertStyle,
+                type: AlertType.success,
+                title: "Reward",
+                desc: "You have recieved  $amount  DOT coins",
+                buttons: [
+                  DialogButton(
+                    child: Text(
+                      "COOL",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    },
+                    color: Color(0xff202125),
+                    radius: BorderRadius.circular(10.0),
+                  ),
+                ],
+              ).show();
+              Alert(
+                      context: context,
+                      title: "Upload Complete",
+                      desc: "Upload Complete")
+                  .show();
               //Go back to the main screen
               Navigator.pop(context);
             } catch (e) {
