@@ -86,6 +86,21 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('DOT'),
+//        actions: <Widget>[
+//          Center(child: Text('1 Coin(s)')),
+//          Padding(padding: EdgeInsets.all(1)),
+//          FlatButton(
+//            onPressed: () {
+//              Navigator.push(
+//                  context,
+//                  MaterialPageRoute(
+//                    builder: (context) => VotingPage(),
+//                  ));
+//            },
+//            child: Text('VOTE'),
+//          ),
+//          Padding(padding: EdgeInsets.all(1))
+//        ],
       ),
       //Wait until the controller is initialized before displaying the camera
       //preview. Future builder displays a loading spinner until the controller
@@ -135,7 +150,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => DisplayPictureScreen(
+                      builder: (context) => UploadPicture(
                           imagePath: path, fileName: name, location: position),
                     ),
                   );
@@ -148,18 +163,21 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   }
 }
 
-class DisplayPictureScreen extends StatelessWidget {
+class UploadPicture extends StatelessWidget {
   final String imagePath;
   final String fileName;
   final Position location;
-  const DisplayPictureScreen(
+  const UploadPicture(
       {Key key, this.imagePath, this.fileName, this.location})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Display the Picture')),
+      appBar: AppBar(
+        title: Text('Upload'),
+//        actions: <Widget>[Text('1 Coin')],
+      ),
       //Constructs an image object from the path passed in as a parameter to the widget
       body: Scaffold(body: Image.file(File(imagePath))),
       floatingActionButton: FloatingActionButton(
@@ -227,7 +245,35 @@ class DisplayPictureScreen extends StatelessWidget {
                   .show();
               //Go back to the main screen
               Navigator.pop(context);
+            } on DioError catch (e) {
+              var alertStyle = AlertStyle(
+//                overlayColor: Colors.blue[400],
+                overlayColor: Color(0xfff98650),
+                animationType: AnimationType.fromTop,
+                backgroundColor: Color(0xfff7f5ea),
+                isCloseButton: false,
+                isOverlayTapDismiss: false,
+                descStyle: TextStyle(
+                    fontWeight: FontWeight.bold, color: Color(0xff202125)),
+                animationDuration: Duration(milliseconds: 400),
+                alertBorder: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50.0),
+                  side: BorderSide(
+                    color: Colors.grey,
+                  ),
+                ),
+                titleStyle: TextStyle(
+                  color: Color(0xff393a3f),
+                ),
+              );
+              Alert(
+                      context: context,
+                      style: alertStyle,
+                      title: "Upload Error",
+                      desc: "Upload Error $e")
+                  .show();
             } catch (e) {
+              print('line 238');
               print(e);
             }
           }),
@@ -245,6 +291,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (BuildContext context) => HomePage(),
         '/signup': (BuildContext context) => SignUpPage(),
+        '/vote': (BuildContext context) => VotingPage()
       },
     );
   }
@@ -260,6 +307,50 @@ class HomePage extends StatelessWidget {
         alignment: Alignment.center,
         child: Text('Home Page'),
       ),
+    );
+  }
+}
+
+class VotingPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTextStyle(
+      style: Theme.of(context).textTheme.display1,
+      child: GestureDetector(
+        onTap: () {
+          // This moves from the personal info page to the credentials page,
+          // replacing this page with that one.
+//          Navigator.of(context)
+//              .pushReplacementNamed('signup/choose_credentials');
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('DOT'),
+            actions: <Widget>[
+              Center(child: Text('1 Coin(s)')),
+              Padding(padding: EdgeInsets.all(10))
+            ],
+          ),
+          body: Container(
+            color: Colors.lightBlue,
+            alignment: Alignment.center,
+            child: Text('Voting Page'),
+          ),
+          floatingActionButton:
+            Row(children: [
+              FloatingActionButton(
+                  child: Icon(Icons.cancel),
+                  onPressed: () {
+                    print('Left');
+                  }),
+              FloatingActionButton(
+                  child: Icon(Icons.check),
+                  onPressed: () {
+                    print('Right');
+                  })
+            ]),
+          ),
+        ),
     );
   }
 }
@@ -337,6 +428,9 @@ class SignUpPage extends StatelessWidget {
                     Navigator.of(context).pop();
                   },
                 );
+            break;
+          case '/vote':
+            builder = (BuildContext _) => VotingPage();
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');
